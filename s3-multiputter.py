@@ -40,7 +40,7 @@ class MPUploader(Process):
     def __init__(self, queue, donequeue, srcfile, chunksize, bucket):
         self.s3c = boto.connect_s3()
         for mpu in self.s3c.lookup(bucket).list_multipart_uploads():
-            if mpu.key_name == srcfile:
+            if mpu.key_name == time.strftime("%Y%m%d")+'/'+srcfile:
                 self.multipart = mpu
                 break
         self.work = queue
@@ -52,6 +52,7 @@ class MPUploader(Process):
     def send_part(self, partno):
         while True:
             try:
+                self.buffer.seek(0)
                 self.multipart.upload_part_from_file(self.buffer, partno+1)
                 break
             except Exception as s3err:
@@ -85,7 +86,7 @@ if __name__ == '__main__':
     workers = int(sys.argv[3])
     chunksize = int(sys.argv[4])*1024*1024
     s3c = boto.connect_s3()
-    mpu = s3c.lookup(buck).initiate_multipart_upload(srcfile)
+    mpu = s3c.lookup(buck).initiate_multipart_upload(time.strftime("%Y%m%d")+'/'+srcfile)
     work = Queue()
     donework = Queue()
     
