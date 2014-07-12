@@ -93,7 +93,7 @@ if __name__ == '__main__':
     work = Queue()
     donework = Queue()
     
-    starttime = time.clock()
+    starttime = time.time()
     
     chunkstep = 100
     chunkserving = 0
@@ -145,6 +145,6 @@ if __name__ == '__main__':
             exit()
     
     complete = mpu.complete_upload()
-    print "COMPLETED IN ", time.clock()-starttime, "s"
+    print "COMPLETED IN ", time.time()-starttime, "s"
     exit()
 
