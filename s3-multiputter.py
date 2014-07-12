@@ -35,12 +35,14 @@ import cStringIO
 from multiprocessing import Process, Queue
 from Queue import Empty
 import time
+import string
+import random
 
 class MPUploader(Process):
-    def __init__(self, queue, donequeue, srcfile, chunksize, bucket):
+    def __init__(self, queue, donequeue, srcfile, mpu_key_name, chunksize, bucket):
         self.s3c = boto.connect_s3()
         for mpu in self.s3c.lookup(bucket).list_multipart_uploads():
-            if mpu.key_name == time.strftime("%Y%m%d")+'/'+srcfile:
+            if mpu.key_name == mpu_key_name:
                 self.multipart = mpu
                 break
         self.work = queue
@@ -83,10 +85,11 @@ class MPUploader(Process):
 if __name__ == '__main__':
     buck = sys.argv[1]
     srcfile = sys.argv[2]
+    mpu_key_name = time.strftime("%Y%m%d")+'/'+srcfile+'_'+(''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for _ in range(16)))
     workers = int(sys.argv[3])
     chunksize = int(sys.argv[4])*1024*1024
     s3c = boto.connect_s3()
-    mpu = s3c.lookup(buck).initiate_multipart_upload(time.strftime("%Y%m%d")+'/'+srcfile)
+    mpu = s3c.lookup(buck).initiate_multipart_upload(mpu_key_name)
     work = Queue()
     donework = Queue()
     
@@ -104,7 +107,7 @@ if __name__ == '__main__':
     uploader = range(workers)
     print "Launching workers ",
     for i in range(workers):
-        uploader[i] = MPUploader(work, donework, srcfile, chunksize, buck)
+        uploader[i] = MPUploader(work, donework, srcfile, mpu_key_name, chunksize, buck)
         uploader[i].start()
         print ".",
         sys.stdout.flush()
