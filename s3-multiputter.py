@@ -85,7 +85,8 @@ class MPUploader(Process):
 if __name__ == '__main__':
     buck = sys.argv[1]
     srcfile = sys.argv[2]
-    mpu_key_name = time.strftime("%Y%m%d")+'/'+srcfile+'_'+(''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for _ in range(16)))
+
+    mpu_key_name = time.strftime("%Y%m%d")+'/'+srcfile.split('/')[-1]+'_'+(''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for _ in range(16)))
     workers = int(sys.argv[3])
     chunksize = int(sys.argv[4])*1024*1024
     s3c = boto.connect_s3()
